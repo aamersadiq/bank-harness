@@ -46,39 +46,38 @@ This application follows Domain-Driven Design (DDD) principles with a layered ar
 
 ## Prerequisites
 
-- Node.js (v14 or higher)
-- Docker and Docker Compose
-- npm or yarn
+- Node.js 18 or higher (tested on Node 24)
+- Docker and Docker Compose (used only to run MongoDB locally)
+- npm
 
-## Getting Started
+## Running the API
 
-### 1. Clone the repository
-
-```bash
-git clone <repository-url>
-cd banking-app
-```
-
-### 2. Install dependencies
+### 1. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Start MongoDB using Docker Compose
+### 2. Start MongoDB
+
+MongoDB is required — the server exits on startup if it can't connect. Start it (and the
+optional Mongo Express admin UI) with Docker Compose:
 
 ```bash
-docker-compose up -d
+docker compose up -d          # older Docker: docker-compose up -d
 ```
 
-This will start MongoDB and Mongo Express (a web-based MongoDB admin interface).
+This starts two containers defined in [`docker-compose.yml`](./docker-compose.yml):
 
-- MongoDB will be available at `mongodb://localhost:27017`
-- Mongo Express will be available at `http://localhost:8081`
+- **`mongo`** — MongoDB, available at `mongodb://localhost:27017` (user `admin` / password `password`)
+- **`mongo-express`** — web admin UI at `http://localhost:8081`
 
-### 4. Set up environment variables
+To start only the database: `docker compose up -d mongo`.
 
-Create a `.env` file in the root directory with the following content:
+### 3. Configure environment (already provided)
+
+A [`.env`](./.env) file is committed with working defaults, so no setup is needed for local
+runs. It contains:
 
 ```
 PORT=3000
@@ -86,27 +85,52 @@ MONGO_URI=mongodb://admin:password@localhost:27017/banking?authSource=admin
 NODE_ENV=development
 ```
 
-### 5. Build and run the application
+Override any value by editing `.env` (e.g. set a different `PORT`) before starting the server.
 
-For development with hot-reloading:
+### 4. Start the server
+
+Development, with hot-reloading (ts-node + nodemon):
 
 ```bash
 npm run dev
 ```
 
-For production:
+Production (compile TypeScript to `dist/`, then run):
 
 ```bash
 npm run build
 npm start
 ```
 
-### 6. Access the API documentation
+When it's up you'll see `Server running in development mode on port 3000` and
+`MongoDB Connected: localhost` in the logs.
 
-Once the application is running, you can access the Swagger UI documentation at:
+### 5. Verify it's working
 
+Open the interactive Swagger UI at **http://localhost:3000/api-docs**, or smoke-test from the
+command line — create an account, then deposit into it:
+
+```bash
+# Create an account (returns an "id" in data)
+curl -s -X POST http://localhost:3000/api/accounts \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Alice Smith"}'
+
+# Deposit into it — replace <ACCOUNT_ID> with the id from the previous response
+curl -s -X POST http://localhost:3000/api/transactions/deposit \
+  -H "Content-Type: application/json" \
+  -d '{"accountId":"<ACCOUNT_ID>","amount":1000,"description":"Opening deposit"}'
 ```
-http://localhost:3000/api-docs
+
+A successful call returns `{"success":true,"data":{...}}`. See
+[docs/business/workflows.md](docs/business/workflows.md) for the full deposit / withdraw /
+transfer flows.
+
+### Stopping
+
+```bash
+# Stop the server: Ctrl+C in its terminal
+docker compose down           # stop MongoDB (add -v to also delete its data volume)
 ```
 
 ## API Endpoints
