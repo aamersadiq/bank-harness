@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "codebase-discovery": {
+      "source": "DiUS/agent-toolkit",
+      "sourceType": "github",
+      "skillPath": "skills/codebase-discovery/SKILL.md",
+      "computedHash": "a65e6a7b6629c315d6dc0f9279caf6c65341105d74396face569a62abfbbebde"
+    }
+  }
+}
