@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
+    },
+    {
+      "name": "bank-harness-fe",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "../bank-harness-fe", "run", "dev"],
+      "port": 5174
     }
   ]
 }
